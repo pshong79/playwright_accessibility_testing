@@ -1,0 +1,19 @@
+{
+  "name": "accessibility_testing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^22.2.0",
+    "axe-playwright": "^2.0.2"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.9.1",
+    "csv-parse": "^5.5.6"
+  }
+}
