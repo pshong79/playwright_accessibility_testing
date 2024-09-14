@@ -5,6 +5,8 @@ Playwright has the ability to perform accessibility testing by leveraging the [`
 
 It also take advangtage of the [`csv-parser`](https://github.com/adaltas/node-csv/tree/master/packages/csv-parse) to read in `pageUrls` from a csv file and perform accessibilty testing on each page.
 
+To generate the report, the [`objects-to-csv`](https://github.com/anton-bot/objects-to-csv) library is used to export the `violations` JSON data into a `.csv` file. 
+
 ## Prerequisites
 These tools must be installed before completing the following `Setup` steps:
 * Git
@@ -24,6 +26,10 @@ To get this project running locally, follow these steps:
    ```
    $ npm install csv-parse
    ```
+5. Install `objects-to-csv`:
+   ```
+   $ npm i objects-to-csv
+   ```
 
 ## Data
 The test is basically one test that executes over and over for each `url` in the `pageUrl.csv` file. 
@@ -31,9 +37,9 @@ The test is basically one test that executes over and over for each `url` in the
 Update the `urls` in the file to specify all the pages the accessbility test should be executed on.
 
 ## Execution
-Run the command to execute Playwright tests as usual.
+Run the command to scan the sites using the `checkAlly()` method. This will print the report in the console
 ```
-$ npx playwright test
+$ npx playwright test 
 ```
 
 ### Customizing
@@ -47,11 +53,10 @@ There are a few places to customize the test.
     ```
 
 ## Reporting
-#### #TODO - There is still work to be done to come up with a better solution for reporting. One option is to export the results into an Excel file so that the data can be massaged to generate custom reports using PivotTables.
-
-Currently the default reporting is displayed like this:
+### checkA11y() Reporting
+If executing using the `checkA11y()` method, the accessibility test results will be displayed like this:
 ```
-[chromium] › example.spec.js:15:5 › accessibility testing for: https://.../
+[chromium] › example.spec.js:15:5 › accessibility testing for: https://...
 ┌─────────┬──────────────────┬────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────┐
 │ (index) │ id               │ impact     │ description                                                                                                       │ nodes │
 ├─────────┼──────────────────┼────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────┤
@@ -61,7 +66,14 @@ Currently the default reporting is displayed like this:
 │ 3       │ 'region'         │ 'moderate' │ 'Ensures all page content is contained by landmarks'                                                              │ 2     │
 │ 4       │ 'role-img-alt'   │ 'serious'  │ 'Ensures [role="img"] elements have alternate text'                                                               │ 1     │
 └─────────┴──────────────────┴────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────┘
-  1) [chromium] › example.spec.js:15:5 › accessibility testing for: https://.../ 
+  1) [chromium] › example.spec.js:15:5 › accessibility testing for: https://... 
 
     AssertionError: 5 accessibility violations were detected
-    ```
+```
+
+### getViolations() Reporting
+`getViolations()` will return a JSON object with the violations based on the `tags` specified. The violations are then exported into a `.csv` file and saved under the `test-results` directory.
+
+#### # TODO
+There is still work to be done to come up with possibly a better solution for reporting. 
+* One option is to export the results into an Excel file so that the data can be massaged to generate custom reports using PivotTables.
