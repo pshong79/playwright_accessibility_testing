@@ -1,24 +1,32 @@
-module.exports ={
-  reformatPageUrl,
+//@ts-check
+
+module.exports = {
+  createDirectory,
   getDateReformatted
 }
 
-function reformatPageUrl(pageUrl) {
-  let tempString; 
-  let removeHttps = pageUrl.slice(8);
-  const stringLength = removeHttps.length;
-  let lastChar = removeHttps.slice(-1);
+import fs from 'fs';
 
-  if (lastChar == '/') {
-    tempString = removeHttps.substring(0, stringLength - 1);
-  } else {
-    tempString = removeHttps;
-  }
-  
-  let replaceBackSlashString = tempString.replaceAll('/', '-');
-  let finalString = replaceBackSlashString.replaceAll('.', '-');
-  
-  return finalString;
+function createDirectory(dirName) {
+  const path = `./test-results/${dirName}`;
+
+  fs.access(path, (error) => {
+
+    // To check if given directory 
+    // already exists or not
+    if (error) {
+      // If current directory does not exist then create it
+      fs.mkdir(path, { recursive: true }, (error) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("New Directory created successfully !!");
+        }
+      });
+    } else {
+      console.log("Given Directory already exists !!");
+    }
+  });
 }
 
 function getDateReformatted() {
@@ -27,3 +35,13 @@ function getDateReformatted() {
 
   return reformattedDate;
 }
+
+// function setExpireDate() {
+//   const oneMonthInMilliseconds = 1000 * 60 * 60 * 24 * 30;
+//   const todayDateTime = Date.now();
+//   const expireDate = new Date(todayDateTime + oneMonthInMilliseconds);
+
+//   console.log('Expire Date:', expireDate.toString());
+//   console.log('Expire Date in milliseconds:', expireDate.valueOf());
+//   return expireDate.valueOf();
+// }

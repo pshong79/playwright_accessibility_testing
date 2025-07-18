@@ -5,8 +5,6 @@ Playwright has the ability to perform accessibility testing by leveraging the [`
 
 It also take advangtage of the [`csv-parser`](https://github.com/adaltas/node-csv/tree/master/packages/csv-parse) to read in `pageUrls` from a csv file and perform accessibilty testing on each page.
 
-To generate the report, the [`objects-to-csv`](https://github.com/anton-bot/objects-to-csv) library is used to export the `violations` JSON data into a `.csv` file. 
-
 ## Prerequisites
 These tools must be installed before completing the following `Setup` steps:
 * Git
@@ -26,10 +24,6 @@ To get this project running locally, follow these steps:
    ```
    $ npm install csv-parse
    ```
-5. Install `objects-to-csv`:
-   ```
-   $ npm i objects-to-csv
-   ```
 
 ## Data
 The test is basically one test that executes over and over for each `url` in the `pageUrl.csv` file. 
@@ -37,10 +31,13 @@ The test is basically one test that executes over and over for each `url` in the
 Update the `urls` in the file to specify all the pages the accessbility test should be executed on.
 
 ## Execution
-Run the command to scan the sites using the `checkAlly()` method. This will print the report in the console
+Run the command to execute Playwright tests as usual.
 ```
-$ npx playwright test 
+$ npx playwright test
 ```
+See the **Reporting** section to see how to generate a consolidated report.
+
+See the **Troubleshooting** section if there are any test failures.
 
 ### Customizing
 There are a few places to customize the test.
@@ -49,31 +46,30 @@ There are a few places to customize the test.
 
     Example:
     ```
-    values: ['wcag2a']
+    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
     ```
 
 ## Reporting
-### checkA11y() Reporting
-If executing using the `checkA11y()` method, the accessibility test results will be displayed like this:
-```
-[chromium] › example.spec.js:15:5 › accessibility testing for: https://...
-┌─────────┬──────────────────┬────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────┐
-│ (index) │ id               │ impact     │ description                                                                                                       │ nodes │
-├─────────┼──────────────────┼────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────┤
-│ 0       │ 'color-contrast' │ 'serious'  │ 'Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds' │ 2     │
-│ 1       │ 'empty-heading'  │ 'minor'    │ 'Ensures headings have discernible text'                                                                          │ 1     │
-│ 2       │ 'link-name'      │ 'serious'  │ 'Ensures links have discernible text'                                                                             │ 1     │
-│ 3       │ 'region'         │ 'moderate' │ 'Ensures all page content is contained by landmarks'                                                              │ 2     │
-│ 4       │ 'role-img-alt'   │ 'serious'  │ 'Ensures [role="img"] elements have alternate text'                                                               │ 1     │
-└─────────┴──────────────────┴────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────┘
-  1) [chromium] › example.spec.js:15:5 › accessibility testing for: https://... 
+### HTML format
+Currently, the test returns individual reports for each individual url in `html` format using the defaul `axe` reporting inside the ``test-results/${testDate}_accessibility-test-results_html` directory.
 
-    AssertionError: 5 accessibility violations were detected
+A script (`scripts/consolidate_html_reports.js`) was created to consolidate all of the individual reports into one `html` report. This script can be executed with:
+```
+$ node scripts/consolidate_html_reports.js
 ```
 
-### getViolations() Reporting
-`getViolations()` will return a JSON object with the violations based on the `tags` specified. The violations are then exported into a `.csv` file and saved under the `test-results` directory.
+This should create a file named `consolidated-accessibility-report_html.html` inside the `test-results` directory. This file will need to be opened using a browser to view in a user-friendly view. When opened, the report pulls from all the individual reports from the test run so the report needs to be shared with others, **both** the `consolidated-accessibility-report_html.html` **and** the folder containing the individual reports will need to be shared.
 
-#### # TODO
-There is still work to be done to come up with possibly a better solution for reporting. 
-* One option is to export the results into an Excel file so that the data can be massaged to generate custom reports using PivotTables.
+**#FIXME: Generally, it works well; however, there is still a few things to iron out:**
+1. It seems like there is a limit to the length of the individual report name that allows it to load properly in the `consolidated-accessibilty-report_html.html` file. The do, however, load if opened individually. (Possible solution: rethink how it is naming the individual test result files.)
+2. Sometimes, the initial loading of the individual report when it is expanded within the `consolidated-accessibility-report_html.html` could be a little slow. Not sure if this is can be improved.
+
+### CSV format
+The ability to produce a `csv` report that was used previously has been added. The test, `csv report - accessibility testing for: ${record.url}`, will output a `csv` file for each url in the `pageUrls.csv` file into the `test-results/${testDate}_accessibility-test-results_csv` directory. The reports can then be consolidated using an external script.
+
+**TODO: Add csv consoliation script.**
+
+## Troubleshooting
+1. All of the `html report` tests *should* pass.
+   * If any of the test runs fail, attempt to re-run the tests again, especially if the failures are in a non-production environment. Most likely, it was caused by the server shutting down due to being idle and it needed to be woken up again. If the same tests fail a second time, then more investigation may be needed.
+   * For the `csv report` tests, there will be tests that fail. This is intended. Failed tests mean there are accessibility violations.
